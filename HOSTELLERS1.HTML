@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>THE DYNASTY | ROYAL COLOR</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Montserrat:wght@200;300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-deep: #050505;
+            --gold-primary: #FFD700; /* Brighter Gold */
+            --gold-shine: #FFFACD;
+            --text-white: #FFFFFF;
+            --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+            --card-overlay: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);
+        }
+
+        * { 
+            margin: 0; padding: 0; 
+            box-sizing: border-box; 
+            cursor: none; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-white);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            height: 100vh;
+        }
+
+        /* --- 1. PRELOADER --- */
+        #loader {
+            position: fixed; 
+            inset: 0; 
+            background: #000; 
+            z-index: 50000;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;
+            transition: opacity 0.8s ease;
+        }
+        .loader-logo {
+            font-family: 'Cinzel', serif; 
+            font-size: 3rem; 
+            color: var(--gold-primary);
+            letter-spacing: 8px; 
+            margin-bottom: 20px; 
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            animation: pulseGold 2s infinite;
+        }
+        .loader-line {
+            width: 150px; 
+            height: 2px; 
+            background: rgba(255,255,255,0.1); 
+            position: relative; 
+            overflow: hidden; 
+            border-radius: 2px;
+        }
+        .loader-progress {
+            position: absolute; 
+            top: 0; left: 0; 
+            height: 100%; 
+            width: 0%; 
+            background: var(--gold-primary);
+            box-shadow: 0 0 10px var(--gold-primary);
+            animation: loadProgress 2s var(--ease-out) forwards;
+        }
+        @keyframes pulseGold { 
+            0%, 100% {opacity: 1; text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);} 
+            50% {opacity: 0.8; text-shadow: 0 0 5px rgba(255, 215, 0, 0.2);} 
+        }
+        @keyframes loadProgress { 0% {width:0%} 100% {width:100%} }
+
+        /* --- 2. TRANSITION SHUTTER --- */
+        .shutter-panel {
+            position: fixed; 
+            top: 0; width: 50%; 
+            height: 100%; 
+            background: #000; 
+            z-index: 20000;
+            transition: transform 0.8s var(--ease-out);
+        }
+        .shutter-left { 
+            left: 0; 
+            transform: translateX(-100%); 
+            border-right: 1px solid var(--gold-primary); 
+        }
+        .shutter-right { 
+            right: 0; 
+            transform: translateX(100%); 
+            border-left: 1px solid var(--gold-primary); 
+        }
+        .shutter-active .shutter-left { 
+            transform: translateX(0); 
+        }
+        .shutter-active .shutter-right { 
+            transform: translateX(0); 
+        }
+
+        /* --- 3. CUSTOM CURSOR --- */
+        .cursor-dot {
+            position: fixed; 
+            width: 8px; 
+            height: 8px; 
+            background: var(--gold-primary);
+            box-shadow: 0 0 10px var(--gold-primary);
+            border-radius: 50%; 
+            pointer-events: none; 
+            z-index: 10001; 
+            transition: transform 0.1s;
+        }
+        .cursor-circle {
+            position: fixed; 
+            width: 40px; 
+            height: 40px; 
+            border: 1px solid rgba(255, 215, 0, 0.5); 
+            border-radius: 50%; 
+            pointer-events: none; 
+            z-index: 10000;
+            transition: transform 0.15s ease-out, opacity 0.2s; 
+            mix-blend-mode: screen;
+        }
+        body.hovering .cursor-circle { 
+            transform: scale(1.8); 
+            background: rgba(255, 215, 0, 0.1); 
+            border-color: var(--gold-primary); 
+        }
+
+        /* --- 4. HERO SECTION --- */
+        #hero {
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;
+            position: relative; 
+            overflow: hidden;
+        }
+        .hero-bg-layer {
+            position: absolute; 
+            inset: -5%;
+            /* Fixed URL to raw */
+            background: url('https://raw.githubusercontent.com/shubhamsanap1092-dot/Hostelers/main/IMG-20251006-WA0077.jpg') center/cover;
+            filter: brightness(0.6) contrast(1.1) saturate(1.2); 
+            z-index: -2; 
+            transition: transform 0.2s linear;
+        }
+        .vignette { 
+            position: absolute; 
+            inset: 0; 
+            background: radial-gradient(circle, transparent 30%, #050505 100%); 
+            z-index: -1; 
+        }
+        
+        .hero-main-text {
+            font-family: 'Cinzel', serif; 
+            font-size: clamp(3rem, 10vw, 8rem); 
+            color: #fff;
+            text-align: center; 
+            line-height: 1; 
+            margin-bottom: 10px;
+            background: linear-gradient(to bottom, #fff 30%, #D4AF37 100%); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 30px rgba(0,0,0,0.8));
+        }
+        .hero-sub-text {
+            font-family: 'Pinyon Script', cursive; 
+            font-size: clamp(1.5rem, 3vw, 3rem); 
+            color: var(--gold-primary);
+            margin-bottom: 50px; 
+            opacity: 0; 
+            animation: fadeUp 1s ease 1s forwards;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
+        }
+        
+        .enter-btn {
+            padding: 18px 50px; 
+            background: rgba(0,0,0,0.3); 
+            border: 1px solid var(--gold-primary);
+            color: var(--gold-primary); 
+            font-family: 'Montserrat', sans-serif; 
+            letter-spacing: 4px; 
+            font-size: 0.8rem;
+            text-transform: uppercase; 
+            position: relative; 
+            overflow: hidden; 
+            transition: 0.5s;
+            opacity: 0; 
+            animation: fadeUp 1s ease 1.4s forwards;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+            backdrop-filter: blur(5px);
+        }
+        .enter-btn:hover { 
+            background: var(--gold-primary); color: #000; 
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.6); 
+        }
+
+        /* --- 5. CATEGORIES (COLORFUL) --- */
+        #categories { 
+            min-height: 100vh; 
+            display: none; 
+            padding: 100px 5%; 
+            align-items: center; 
+            justify-content: center; }
+        .cat-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 40px; 
+            width: 100%;
+            max-width: 1400px;
+        }
+        
+        .profile-card {
+            height: 500px; 
+            position: relative; 
+            border-radius: 8px; 
+            overflow: hidden;
+            transition: transform 0.4s var(--ease-out), box-shadow 0.4s; 
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .profile-card:hover { 
+            transform: translateY(-15px) scale(1.02); 
+            border-color: var(--gold-primary);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 20px rgba(212, 175, 55, 0.2);
+            z-index: 10;
+        }
+        
+        .pc-bg {
+            position: absolute; 
+            inset: 0; 
+            background-size: cover; 
+            background-position: center top;
+            transition: transform 0.8s; 
+            filter: brightness(0.8) contrast(1.1);
+        }
+        .profile-card:hover .pc-bg { 
+            transform: scale(1.1); 
+            filter: brightness(1) contrast(1.1); 
+        }
+        
+        .pc-content {
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            padding: 40px 30px;
+            background: var(--card-overlay);
+        }
+        .pc-name {
+            font-family: 'Cinzel', serif; 
+            font-size: 2.2rem; 
+            color: #fff; 
+            margin-bottom: 5px;
+            transform: translateY(10px); 
+            transition: 0.4s;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+        .pc-count {
+            font-family: 'Montserrat', sans-serif; 
+            font-size: 0.9rem; 
+            color: var(--gold-primary);
+            opacity: 0; 
+            transform: translateY(10px); 
+            transition: 0.4s 0.1s; 
+            letter-spacing: 2px;
+        }
+        .profile-card:hover .pc-name, .profile-card:hover .pc-count { 
+            transform: translateY(0); 
+            opacity: 1; 
+        }
+
+        /* --- 6. GALLERY MASONRY --- */
+        #gallery { 
+            display: none; 
+            padding: 120px 5% 50px; 
+        }
+        .gallery-header { 
+            text-align: center; 
+            margin-bottom: 60px; 
+        }
+        .gallery-title {
+            font-family: 'Cinzel', serif; 
+            font-size: 3rem; 
+            color: var(--gold-primary); 
+            letter-spacing: 5px; 
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        }
+        
+        .masonry-grid { column-count: 4; column-gap: 20px; }
+        @media (max-width: 1200px) { .masonry-grid { column-count: 3; } }
+        @media (max-width: 800px) { .masonry-grid { column-count: 2; } }
+        @media (max-width: 500px) { .masonry-grid { column-count: 1; } }
+
+        .m-item {
+            break-inside: avoid; 
+            margin-bottom: 20px; 
+            position: relative; 
+            overflow: hidden;
+            border-radius: 6px; 
+            opacity: 0; 
+            transform: translateY(30px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+        .m-item.revealed { 
+            animation: fadeReveal 0.8s var(--ease-out) forwards; 
+        }
+        .m-item:hover { 
+            transform: translateY(-5px); 
+            z-index: 2; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
+        }
+        
+        .m-img { 
+            width: 100%; 
+            display: block; 
+            transition: 0.6s; 
+            filter: contrast(1.05);
+        }
+        .m-item:hover .m-img { 
+            transform: scale(1.05); 
+        }
+        
+        .m-overlay {
+            position: absolute; 
+            inset: 0; 
+            background: rgba(0,0,0,0.3);
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            opacity: 0; 
+            transition: 0.3s;
+        }
+        .m-item:hover .m-overlay { opacity: 1; }
+        .m-heart {
+            font-size: 2.5rem; 
+            color: #fff; 
+            transform: scale(0.5); 
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .m-heart:hover { 
+            color: #ff4757; 
+            transform: scale(1.2); 
+            filter: drop-shadow(0 0 15px #ff4757); 
+        }
+        .m-heart.liked { 
+            color: #ff4757; 
+            transform: scale(1); 
+        }
+
+        /* --- 7. DOCK & UI --- */
+        .dock {
+            position: fixed; 
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            background: rgba(10, 10, 10, 0.85); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
+            padding: 15px 35px; 
+            border-radius: 100px; 
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            display: flex; 
+            gap: 30px; 
+            z-index: 9000; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .dock-icon {
+            color: #aaa; 
+            font-size: 1.5rem; 
+            transition: 0.3s; 
+            position: relative;
+        }
+        .dock-icon:hover, .dock-icon.active { 
+            color: var(--gold-primary); transform: translateY(-5px); 
+            text-shadow: 0 0 15px var(--gold-primary);
+        }
+        
+        .back-btn {
+            position: fixed; 
+            top: 30px; 
+            left: 30px; 
+            z-index: 9000;
+            background: rgba(0,0,0,0.5); 
+            border: 1px solid rgba(255,255,255,0.2);
+            width: 50px; 
+            height: 50px; 
+            border-radius: 50%; 
+            display: none;
+            align-items: center; 
+            justify-content: center; 
+            color: #fff; 
+            transition: 0.3s;
+        }
+        .back-btn:hover { 
+            background: var(--gold-primary); 
+            border-color: var(--gold-primary); 
+            color: #000; 
+            box-shadow: 0 0 20px var(--gold-primary);
+        }
+
+        /* --- 8. LIGHTBOX --- */
+        #lightbox {
+            position: fixed; 
+            inset: 0; 
+            background: rgba(5,5,5,0.98); 
+            z-index: 21000;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;
+            opacity: 0; 
+            pointer-events: none; 
+            transition: 0.4s;
+        }
+        #lightbox.active { 
+            opacity: 1; 
+            pointer-events: all; 
+        }
+        .lb-img-wrap {
+            max-width: 90vw; 
+            max-height: 80vh; 
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            border: 1px solid #333;
+        }
+        .lb-img-wrap img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; 
+            display: block; 
+        }
+        
+        .lb-controls { 
+            margin-top: 30px; 
+            display: flex; 
+            gap: 40px; 
+        }
+        .lb-btn { 
+            font-size: 1.8rem; 
+            color: #fff;
+            opacity: 0.6; 
+            transition: 0.3s; 
+        }
+        .lb-btn:hover { 
+            opacity: 1; 
+            color: var(--gold-primary); 
+            transform: scale(1.1); 
+            text-shadow: 0 0 10px var(--gold-primary); 
+        }
+
+        /* Animations */
+        @keyframes fadeUp { 
+            from {opacity:0; transform:translateY(40px);} 
+            to {opacity:1; transform:translateY(0);} 
+        }
+        @keyframes fadeReveal { 
+            from {opacity:0; transform:translateY(50px);} 
+            to {opacity:1; transform:translateY(0);} 
+        }
+
+    </style>
+</head>
+<body oncontextmenu="return false;">
+<div id="loader">
+        <div class="loader-logo" style="font-size: clamp(1rem, 4vw, 2rem); text-align: center; padding: 0 20px;">
+            WELCOME TO HOSTELERS PHOTOGALLARY <br>
+            <span style="font-family: 'Montserrat', sans-serif; font-size: 0.8rem; letter-spacing: 3px; color: #fff; opacity: 0.7;">
+                DEVELOPED BY SHUBHAM SANAP
+            </span>
+        </div>
+        <div class="loader-line">
+            <div class="loader-progress"></div>
+        </div>
+    </div>
+
+    <div class="shutter-panel shutter-left" id="shutterL"></div>
+    <div class="shutter-panel shutter-right" id="shutterR"></div>
+
+    <audio id="bgAudio" loop>
+        <source src="https://github.com/shubhamsanap1092-dot/RADHAKRISHNA/raw/main/Dil%20Jhoom%20%20Gadar%202%20%20Arijit%20Singh%20%20Utkarsh%20Sharma%2C%20Simratt%20Kaur%20%20Mithoon%2C%20Sayeed%20Quadri%20%20Lyrical%20-%20Zee%20Music%20Company.mp3" type="audio/mp3">
+    </audio>
+
+    <div class="cursor-dot" id="cDot"></div>
+    <div class="cursor-circle" id="cCircle"></div>
+
+    <div class="back-btn" id="backBtn" onclick="app.navTo('categories')"><i class="fa-solid fa-arrow-left"></i></div>
+
+    <div class="dock">
+        <div class="dock-icon" onclick="app.navTo('hero')" title="Home"><i class="fa-solid fa-house"></i></div>
+        <div class="dock-icon" onclick="app.showFavorites()" title="Favorites"><i class="fa-solid fa-heart"></i></div>
+        <div class="dock-icon" onclick="app.toggleAudio()" id="audioBtn" title="Music"><i class="fa-solid fa-volume-xmark"></i></div>
+        <div class="dock-icon" onclick="app.toggleFull()" title="Fullscreen"><i class="fa-solid fa-expand"></i></div>
+    </div>
+
+    <section id="hero">
+        <div class="hero-bg-layer" id="heroBg"></div>
+        <div class="vignette"></div>
+        <div class="hero-main-text"> FE HOSTELERS PHOTOGALLARY</div>
+        <div class="hero-sub-text">hosteler's Archive</div>
+        <button class="enter-btn" id="enterBtn">Enter The Archive</button>
+    </section>
+
+    <section id="categories">
+        <div class="cat-container" id="catGrid">
+            </div>
+    </section>
+
+    <section id="gallery">
+        <div class="gallery-header">
+            <h2 class="gallery-title" id="galTitle">TITLE</h2>
+            <div style="width: 80px; height: 3px; background: var(--gold-primary); margin: 0 auto; border-radius: 2px; box-shadow: 0 0 10px var(--gold-primary);"></div>
+        </div>
+        <div class="masonry-grid" id="masonry"></div>
+    </section>
+
+    <div id="lightbox">
+        <div class="lb-img-wrap">
+            <img id="lbImg" src="">
+        </div>
+        <div class="lb-controls">
+            <div class="lb-btn" onclick="app.prevSlide()"><i class="fa-solid fa-backward-step"></i></div>
+            <div class="lb-btn" onclick="app.togglePlay()" id="playIcon"><i class="fa-solid fa-play"></i></div>
+            <div class="lb-btn" onclick="app.nextSlide()"><i class="fa-solid fa-forward-step"></i></div>
+            <div class="lb-btn" onclick="app.download()"><i class="fa-solid fa-download"></i></div>
+            <div class="lb-btn" onclick="app.closeLb()"><i class="fa-solid fa-xmark"></i></div>
+        </div>
+    </div>
+
+    <script>
+        const db = {
+             'FE HOSTELERS': [
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20251006-WA0065.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20251006-WA0068.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20251006-WA0070.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20251006-WA0073.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20251006-WA0077.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20251006-WA0084.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20251006-WA0088.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20251006-WA0089.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20251006-WA0090.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20251006-WA0094.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20251006-WA0096.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20251006-WA0097.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20251006-WA0099.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20251006-WA0102.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20251006-WA0104.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260102-WA0050.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0001.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0002.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0005.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0008.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0009.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0010.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0011.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0012.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0013.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0014.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0015.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0016.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0017.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0020.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0021.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0030.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0032.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0034.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0036.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0043.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0044.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0045.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0047.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0049.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0050.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0051.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0052.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0053.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0054.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0059.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0065.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0073.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0078.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0081.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0082.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0083.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0084.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0085.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0086.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0087.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0089.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0091.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0092.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0093.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0094.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0095.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0097.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0098.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0099.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0100.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0101.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0102.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0105.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0106.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0107.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0109.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0110.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0111.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0112.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0113.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0114.jpg",
+                "https://github.com/shubhamsanap1092-dot/Hostelers/raw/main/IMG-20260103-WA0115.jpg"
+            ]
+        };
+
+
+        const app = {
+            currentSet: [],
+            currentIdx: 0,
+            slideTimer: null,
+            favorites: JSON.parse(localStorage.getItem('favs')) || [],
+
+            init: () => {
+                setTimeout(() => {
+                    document.getElementById('loader').style.opacity = '0';
+                    setTimeout(() => document.getElementById('loader').style.display = 'none', 800);
+                }, 2000);
+
+                app.cursor();
+                document.getElementById('enterBtn').onclick = () => {
+                    app.navTo('categories');
+                    app.playMusic();
+                };
+
+                app.renderCategories();
+            },
+
+            navTo: (viewName, data) => {
+                const hero = document.getElementById('hero');
+                const cat = document.getElementById('categories');
+                const gal = document.getElementById('gallery');
+                const back = document.getElementById('backBtn');
+
+                document.body.classList.add('shutter-active');
+
+                setTimeout(() => {
+                    hero.style.display = 'none';
+                    cat.style.display = 'none';
+                    gal.style.display = 'none';
+                    back.style.display = 'none';
+                    window.scrollTo(0,0);
+
+                    if(viewName === 'hero') {
+                        hero.style.display = 'flex';
+                    }
+                    else if(viewName === 'categories') {
+                        cat.style.display = 'flex';
+                    }
+                    else if(viewName === 'gallery') {
+                        gal.style.display = 'block';
+                        back.style.display = 'flex';
+                        app.loadGallery(data);
+                    }
+
+                    document.body.classList.remove('shutter-active');
+                }, 1000);
+            },
+
+            renderCategories: () => {
+                const grid = document.getElementById('catGrid');
+                grid.innerHTML = '';
+                
+                Object.keys(db).forEach(name => {
+                    const cover = db[name][0];
+                    const count = db[name].length;
+
+                    const card = document.createElement('div');
+                    card.className = 'profile-card';
+                    card.onclick = () => app.navTo('gallery', name);
+                    card.innerHTML = `
+                        <div class="pc-bg" style="background-image: url('${cover}')"></div>
+                        <div class="pc-content">
+                            <h3 class="pc-name">${name}</h3>
+                            <p class="pc-count">${count} Memories</p>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            },
+
+            loadGallery: (key) => {
+                const grid = document.getElementById('masonry');
+                document.getElementById('galTitle').innerText = key;
+                grid.innerHTML = '';
+
+                let images = [];
+                if(key === 'Favorites') images = app.favorites;
+                else images = db[key] || [];
+
+                app.currentSet = images;
+
+                if(images.length === 0) {
+                    grid.innerHTML = '<p style="text-align:center; width:100%; opacity:0.5;">No images found.</p>';
+                    return;
+                }
+
+                images.forEach((url, i) => {
+                    const isFav = app.favorites.includes(url);
+                    const item = document.createElement('div');
+                    item.className = 'm-item';
+                    item.style.animationDelay = (i * 0.05) + 's';
+                    
+                    item.innerHTML = `
+                        <img src="${url}" class="m-img" loading="lazy">
+                        <div class="m-overlay" onclick="app.openLb('${url}')">
+                            <div class="m-heart ${isFav ? 'liked' : ''}" onclick="event.stopPropagation(); app.toggleFav('${url}', this)">
+                                <i class="fa-solid fa-heart"></i>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(item);
+                    setTimeout(() => item.classList.add('revealed'), 50);
+                });
+            },
+
+            toggleFav: (url, el) => {
+                if(app.favorites.includes(url)) {
+                    app.favorites = app.favorites.filter(u => u !== url);
+                    el.classList.remove('liked');
+                } else {
+                    app.favorites.push(url);
+                    el.classList.add('liked');
+                }
+                localStorage.setItem('favs', JSON.stringify(app.favorites));
+            },
+
+            showFavorites: () => {
+                app.navTo('gallery', 'Favorites');
+            },
+
+            openLb: (url) => {
+                app.currentIdx = app.currentSet.indexOf(url);
+                const lb = document.getElementById('lightbox');
+                document.getElementById('lbImg').src = url;
+                lb.classList.add('active');
+            },
+            closeLb: () => {
+                document.getElementById('lightbox').classList.remove('active');
+                clearInterval(app.slideTimer);
+                app.slideTimer = null;
+                document.querySelector('#playIcon i').className = 'fa-solid fa-play';
+            },
+            nextSlide: () => {
+                app.currentIdx = (app.currentIdx + 1) % app.currentSet.length;
+                document.getElementById('lbImg').src = app.currentSet[app.currentIdx];
+            },
+            prevSlide: () => {
+                app.currentIdx = (app.currentIdx - 1 + app.currentSet.length) % app.currentSet.length;
+                document.getElementById('lbImg').src = app.currentSet[app.currentIdx];
+            },
+            togglePlay: () => {
+                const icon = document.querySelector('#playIcon i');
+                if(app.slideTimer) {
+                    clearInterval(app.slideTimer);
+                    app.slideTimer = null;
+                    icon.className = 'fa-solid fa-play';
+                } else {
+                    icon.className = 'fa-solid fa-pause';
+                    app.nextSlide();
+                    app.slideTimer = setInterval(app.nextSlide, 3000);
+                }
+            },
+            download: () => {
+                const a = document.createElement('a');
+                a.href = app.currentSet[app.currentIdx];
+                a.download = 'Royal_Memory.jpg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            },
+
+            playMusic: () => {
+                const aud = document.getElementById('bgAudio');
+                aud.play().then(() => {
+                    document.getElementById('audioBtn').innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+                    document.getElementById('audioBtn').classList.add('active');
+                }).catch(e => console.log("Audio requires interaction"));
+            },
+            toggleAudio: () => {
+                const aud = document.getElementById('bgAudio');
+                const btn = document.getElementById('audioBtn');
+                if(aud.paused) {
+                    aud.play();
+                    btn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+                    btn.classList.add('active');
+                } else {
+                    aud.pause();
+                    btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+                    btn.classList.remove('active');
+                }
+            },
+            toggleFull: () => {
+                if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+                else if(document.exitFullscreen) document.exitFullscreen();
+            },
+
+            cursor: () => {
+                const dot = document.getElementById('cDot');
+                const circle = document.getElementById('cCircle');
+                
+                window.addEventListener('mousemove', e => {
+                    dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+                    circle.style.transform = `translate(${e.clientX - 20}px, ${e.clientY - 20}px)`;
+                    
+                    if(document.getElementById('hero').style.display !== 'none') {
+                        const bg = document.getElementById('heroBg');
+                        const x = (window.innerWidth - e.clientX * 2) / 50;
+                        const y = (window.innerHeight - e.clientY * 2) / 50;
+                        bg.style.transform = `translate(${x}px, ${y}px) scale(1.1)`;
+                    }
+                });
+
+                const interactables = 'button, a, .profile-card, .m-item, .dock-icon, .lb-btn, .back-btn';
+                document.body.addEventListener('mouseover', e => {
+                    if(e.target.closest(interactables)) document.body.classList.add('hovering');
+                    else document.body.classList.remove('hovering');
+                });
+            }
+        };
+
+        window.onload = app.init;
+    </script>
+</body>
+</html>
